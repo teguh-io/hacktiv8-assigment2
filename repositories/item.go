@@ -7,9 +7,9 @@ import (
 )
 
 type ItemRepo interface {
-	CreateItem(item models.Item) error
+	CreateItem(item []models.Item) error
 	GetItems() ([]models.Item, error)
-	UpdateItem(ID int, item models.Item) error
+	UpdateItemByOrderID(orderId int, item []models.Item) error
 	DeleteItem(ID int) error
 }
 
@@ -24,7 +24,7 @@ func NewItemRepo(db *gorm.DB) ItemRepo {
 	}
 }
 
-func (ir *itemRepo) CreateItem(item models.Item) error {
+func (ir *itemRepo) CreateItem(item []models.Item) error {
 	return ir.currDB.Create(&item).Error
 }
 
@@ -34,8 +34,8 @@ func (ir *itemRepo) GetItems() ([]models.Item, error) {
 	return items, err
 }
 
-func (ir *itemRepo) UpdateItem(ID int, item models.Item) error {
-	return ir.currDB.Where("id=?", ID).Updates(&item).Error
+func (ir *itemRepo) UpdateItemByOrderID(orderID int, items []models.Item) error {
+	return ir.currDB.Model(models.Item{}).Where("order_id = ", orderID).Updates(&items).Error
 }
 
 func (ir *itemRepo) DeleteItem(ID int) error {

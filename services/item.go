@@ -7,8 +7,8 @@ import (
 )
 
 type ItemService interface {
-	CreateItem(request params.Item, orderID int) error
-	UpdateItem(ID int, request params.Item) error
+	CreateItem(orderID int, request []params.Item) error
+	UpdateItemsByOrderID(ID int, request []params.Item) error
 	DeleteItem(ID int) error
 }
 
@@ -39,30 +39,34 @@ func toParamItem(itemModel models.Item) params.Item {
 	}
 }
 
-func (is *itemService) CreateItem(request params.Item, orderID int) error {
-	itemModel := models.Item{
-		ItemCode:    *request.ItemCode,
-		Description: *request.Description,
-		Quantitiy:   *request.Quantity,
-		OrderID:     orderID,
+func toItemModels(orderID int, itemParams []params.Item) []models.Item {
+	itemModels := make([]models.Item, len(itemParams))
+	for idx, itemParam := range itemParams {
+		itemModels[idx] = toItemModel(orderID, itemParam)
 	}
 
-	return is.itemRepo.CreateItem(itemModel)
+	return itemModels
 }
 
-func (is *itemService) UpdateItem(ID int, request params.Item) error {
-	var itemModel models.Item
-	if request.ItemCode != nil {
-		itemModel.ItemCode = *request.ItemCode
+func toItemModel(orderID int, itemParam params.Item) models.Item {
+	return models.Item{
+		ItemCode:    *itemParam.ItemCode,
+		Description: *itemParam.Description,
+		Quantitiy:   *itemParam.Quantity,
+		OrderID:     orderID,
 	}
-	if request.Description != nil {
-		itemModel.Description = *request.Description
-	}
-	if request.Quantity != nil {
-		itemModel.Quantitiy = *request.Quantity
-	}
+}
 
-	return is.itemRepo.UpdateItem(ID, itemModel)
+func (is *itemService) CreateItem(orderID int, request []params.Item) error {
+	itemModels := toItemModels(orderID, request)
+
+	return is.itemRepo.CreateItem(itemModels)
+}
+
+func (is *itemService) UpdateItemsByOrderID(ID int, request []params.Item) error {
+	itemModels := toItemModels(ID, request)
+
+	return is.itemRepo.UpdateItemByOrderID(ID, itemModels)
 }
 
 func (is *itemService) DeleteItem(ID int) error {
