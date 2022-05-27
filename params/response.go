@@ -1,7 +1,8 @@
 package params
 
 type Response struct {
-	Status       int         `json:"status"`
-	ErrorMessage *string     `json:"error_message,omitempty"`
-	Payload      interface{} `json:"payload,omitempty"`
+	Status         int         `json:"status"`
+	Message        *string     `json:"message,omitempty"`
+	AdditionalInfo *string     `json:"additional_info,omitempty"`
+	Payload        interface{} `json:"payload,omitempty"`
 }

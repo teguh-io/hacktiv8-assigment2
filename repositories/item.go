@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"bootcamp/hacktiv8-assigment2/models"
+	"bootcamp/hacktiv8-assigment2/params"
 
 	"gorm.io/gorm"
 )
@@ -10,7 +11,6 @@ type ItemRepo interface {
 	CreateItem(item []models.Item) error
 	GetItems() ([]models.Item, error)
 	UpdateItemByOrderID(orderId int, item []models.Item) error
-	DeleteItem(ID int) error
 }
 
 type itemRepo struct {
@@ -35,7 +35,22 @@ func (ir *itemRepo) GetItems() ([]models.Item, error) {
 }
 
 func (ir *itemRepo) UpdateItemByOrderID(orderID int, items []models.Item) error {
-	return ir.currDB.Model(models.Item{}).Where("order_id = ", orderID).Updates(&items).Error
+	var item params.Item
+	err := ir.currDB.Transaction(func(tx *gorm.DB) error {
+		err := tx.Where("order_id=?", orderID).Delete(&item).Error
+		if err != nil {
+			return err
+		}
+
+		err = tx.Create(&items).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
 }
 
 func (ir *itemRepo) DeleteItem(ID int) error {

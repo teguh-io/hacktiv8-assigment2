@@ -70,5 +70,5 @@ func (is *itemService) UpdateItemsByOrderID(ID int, request []params.Item) error
 }
 
 func (is *itemService) DeleteItem(ID int) error {
-	return is.itemRepo.DeleteItem(ID)
+	panic("asd")
 }
